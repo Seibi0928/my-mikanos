@@ -4,6 +4,7 @@
         "uefibootservicestablelib.h": "c",
         "loadedimage.h": "c",
         "uefi.h": "c",
-        "simplefilesystem.h": "c"
+        "simplefilesystem.h": "c",
+        "cstdint": "cpp"
     }
 }
