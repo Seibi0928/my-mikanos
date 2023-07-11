@@ -5,6 +5,7 @@
         "loadedimage.h": "c",
         "uefi.h": "c",
         "simplefilesystem.h": "c",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "atomic": "c"
     }
 }
