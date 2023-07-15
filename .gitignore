@@ -3,3 +3,4 @@
 hankaku.bin
 **/*.d
 kernel/disk.img
+*.swp

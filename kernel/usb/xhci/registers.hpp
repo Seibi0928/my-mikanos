@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "../../register.hpp"
+
 namespace usb::xhci {
 union HCSPARAMS1_Bitmap {
     uint32_t data[1];

@@ -6,6 +6,7 @@
         "uefi.h": "c",
         "simplefilesystem.h": "c",
         "cstdint": "cpp",
-        "atomic": "c"
+        "atomic": "c",
+        "cstdio": "cpp"
     }
 }
