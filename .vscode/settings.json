@@ -8,6 +8,7 @@
         "cstdint": "cpp",
         "atomic": "c",
         "cstdio": "cpp",
-        "memory_map.hpp": "c"
+        "memory_map.hpp": "c",
+        "types.h": "c"
     }
 }
