@@ -13,8 +13,10 @@
 #include "logger.hpp"
 #include "memory_map.hpp"
 #include "mouse.hpp"
+#include "paging.hpp"
 #include "pci.hpp"
 #include "queue.hpp"
+#include "segment.hpp"
 #include "usb/classdriver/mouse.hpp"
 #include "usb/device.hpp"
 #include "usb/memory.hpp"
@@ -82,8 +84,13 @@ __attribute__((interrupt)) void IntHandlerXHCI(InterruptFrame* frame) {
     NotifyEndOfInterrupt();
 }
 
-extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config,
-                           const MemoryMap& memory_map) {
+alignas(16) uint8_t kernel_main_stack[1024 * 1024];
+
+extern "C" void KernelMainNewStack(
+    const FrameBufferConfig& frame_buffer_config_ref,
+    const MemoryMap& memory_map_ref) {
+    FrameBufferConfig frame_buffer_config{frame_buffer_config_ref};
+    MemoryMap memory_map{memory_map_ref};
     char pixel_writer_buf[sizeof(RGBResv8BitPerColorPixelWriter)];
     PixelWriter* pixel_writer;
     switch (frame_buffer_config.pixel_format) {
@@ -113,6 +120,15 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config,
         new (console_buf) Console{*pixel_writer, {0, 0, 0}, {255, 255, 255}};
     printk("Welcome to MikanOS!\n");
     SetLogLevel(kWarn);
+
+    SetupSegments();
+
+    const uint16_t kernel_cs = 1 << 3;
+    const uint16_t kernel_ss = 2 << 3;
+    SetDSAll(0);
+    SetCSSS(kernel_cs, kernel_ss);
+
+    SetupIdentityPageTable();
 
     const std::array<MemoryType, 3> available_memory_types{
         MemoryType::kEfiBootServicesCode,
@@ -173,10 +189,9 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config,
         Log(kInfo, "xHC starting\n");
     }
 
-    const uint16_t cs = GetCS();
     SetIDTEntry(idt[InterruptVector::kXHCI],
                 MakeIDTAttr(DescriptorType::kInterruptGate, 0),
-                reinterpret_cast<uint64_t>(IntHandlerXHCI), cs);
+                reinterpret_cast<uint64_t>(IntHandlerXHCI), kernel_cs);
     LoadIDT(sizeof(idt) - 1, reinterpret_cast<uintptr_t>(&idt[0]));
 
     const uint8_t bsp_local_apic_id =
