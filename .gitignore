@@ -3,6 +3,7 @@ hankaku.bin
 *.o
 .*.d
 *.swp
+kernel/disk.img
 
 /html
 /ipxe_root
