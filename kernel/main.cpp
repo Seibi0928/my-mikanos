@@ -1,6 +1,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <numeric>
+#include <vector>
 
 #include "asmfunc.h"
 #include "console.hpp"
@@ -9,6 +11,7 @@
 #include "graphics.hpp"
 #include "interrupt.hpp"
 #include "logger.hpp"
+#include "memory_map.hpp"
 #include "mouse.hpp"
 #include "pci.hpp"
 #include "queue.hpp"
@@ -79,7 +82,8 @@ __attribute__((interrupt)) void IntHandlerXHCI(InterruptFrame* frame) {
     NotifyEndOfInterrupt();
 }
 
-extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
+extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config,
+                           const MemoryMap& memory_map) {
     char pixel_writer_buf[sizeof(RGBResv8BitPerColorPixelWriter)];
     PixelWriter* pixel_writer;
     switch (frame_buffer_config.pixel_format) {
@@ -110,6 +114,29 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
     printk("Welcome to MikanOS!\n");
     SetLogLevel(kWarn);
 
+    const std::array<MemoryType, 3> available_memory_types{
+        MemoryType::kEfiBootServicesCode,
+        MemoryType::kEfiBootServicesData,
+        MemoryType::kEfiConventionalMemory,
+    };
+
+    printk("memory_map: %p\n", &memory_map);
+    for (uintptr_t iter = reinterpret_cast<uintptr_t>(memory_map.buffer);
+         iter <
+         reinterpret_cast<uintptr_t>(memory_map.buffer) + memory_map.map_size;
+         iter += memory_map.descriptor_size) {
+        auto desc = reinterpret_cast<MemoryDescriptor*>(iter);
+        for (int i = 0; i < available_memory_types.size(); ++i) {
+            if (desc->type == available_memory_types[i]) {
+                printk(
+                    "type = %u, phys = %08lx - %08lx, pages = %lu, attr = "
+                    "%08lx\n",
+                    desc->type, desc->physical_start,
+                    desc->physical_start + desc->number_of_pages * 4096 - 1,
+                    desc->number_of_pages, desc->attribute);
+            }
+        }
+    }
     char mouse_cursor_buf[sizeof(MouseCursor)];
     mouse_cursor = new (mouse_cursor_buf)
         MouseCursor{pixel_writer, kDesktopBGColor, {300, 200}};
