@@ -1,6 +1,8 @@
-**/*.o
-**/*.elf
+kernel.elf
 hankaku.bin
-**/*.d
-kernel/disk.img
+*.o
+.*.d
 *.swp
+
+/html
+/ipxe_root
