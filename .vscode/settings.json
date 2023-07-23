@@ -9,6 +9,7 @@
         "atomic": "c",
         "cstdio": "cpp",
         "memory_map.hpp": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "optional": "cpp"
     }
 }
