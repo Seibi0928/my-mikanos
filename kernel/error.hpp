@@ -27,11 +27,12 @@ class Error {
         kUnknownXHCISpeedID,
         kNoWaiter,
         kNoPCIMSI,
+        kUnknownPixelFormat,
         kLastOfCode,  // この列挙子は常に最後に配置する
     };
 
    private:
-    static constexpr std::array<const char*, 21> code_names_{
+    static constexpr std::array code_names_{
         "kSuccess",
         "kFull",
         "kEmpty",
@@ -53,6 +54,7 @@ class Error {
         "kUnknownXHCISpeedID",
         "kNoWaiter",
         "kNoPCIMSI",
+        "kUnknownPixelFormat",
     };
     static_assert(Error::Code::kLastOfCode == code_names_.size());
 
