@@ -43,7 +43,7 @@ int printk(const char* format, ...) {
     console->PutString(s);
     auto elapsed = LAPICTimerElapsed();
     StopLAPICTimer();
-    
+
     sprintf(s, "[%9d]", elapsed);
     console->PutString(s);
     return result;
@@ -258,7 +258,7 @@ extern "C" void KernelMainNewStack(
     auto bgwriter = bgwindow->Writer();
 
     DrawDesktop(*bgwriter);
-    console->SetWriter(bgwriter);
+    console->SetWindow(bgwindow);
 
     auto mouse_window =
         std::make_shared<Window>(kMouseCursorWidth, kMouseCursorHeight,
