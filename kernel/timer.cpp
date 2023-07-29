@@ -1,5 +1,7 @@
 #include "timer.hpp"
 
+#include "interrupt.hpp"
+
 namespace {
 const uint32_t kCountMax = 0xffffffffu;
 volatile uint32_t& lvt_timer = *reinterpret_cast<uint32_t*>(0xfee00320);
@@ -10,7 +12,9 @@ volatile uint32_t& divide_config = *reinterpret_cast<uint32_t*>(0xfee003e0);
 
 void InitializeLAPICTimer() {
     divide_config = 0b1011;
-    lvt_timer = (0b001 << 16) | 32;  // NOTE: masked oneshot
+    lvt_timer = (0b010 << 16) |
+                InterruptVector::kLAPICTimer;  // NOTE: not-masked, periodic
+    initial_count = kCountMax;
 }
 
 void StartLAPICTimer() { initial_count = kCountMax; }

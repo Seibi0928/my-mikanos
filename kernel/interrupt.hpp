@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <deque>
 
-#include "x86_descriptor.hpp"
 #include "message.hpp"
+#include "x86_descriptor.hpp"
 
 union InterruptDescriptorAttribute {
     uint16_t data;
@@ -48,6 +48,7 @@ class InterruptVector {
    public:
     enum Number {
         kXHCI = 0x40,
+        kLAPICTimer = 0x41,
     };
 };
 
