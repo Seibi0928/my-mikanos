@@ -21,6 +21,10 @@ class Layer {
     std::shared_ptr<Window> GetWindow() const;
     /** @brief レイヤーの原点座標を取得する。 */
     Vector2D<int> GetPosition() const;
+    /** @brief true でレイヤーがドラッグ移動可能となる。 */
+    Layer& SetDraggable(bool draggable);
+    /** @brief レイヤーがドラッグ移動可能なら true を返す。 */
+    bool IsDraggable() const;
 
     /** @brief
      * レイヤーの位置情報を指定された絶対座標へと更新する。再描画はしない。 */
@@ -35,6 +39,7 @@ class Layer {
     unsigned int id_;
     Vector2D<int> pos_;
     std::shared_ptr<Window> window_;
+    bool draggable_{false};
 };
 
 /** @brief LayerManager は複数のレイヤーを管理する。 */
@@ -70,6 +75,11 @@ class LayerManager {
     void UpDown(unsigned int id, int new_height);
     /** @brief レイヤーを非表示とする。 */
     void Hide(unsigned int id);
+
+    /** @brief
+     * 指定された座標にウィンドウを持つ最も上に表示されているレイヤーを探す。 */
+    Layer* FindLayerByPosition(Vector2D<int> pos,
+                               unsigned int exclued_id) const;
 
    private:
     FrameBuffer* screen_{nullptr};

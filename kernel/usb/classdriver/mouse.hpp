@@ -7,10 +7,11 @@
 #pragma once
 
 #include <functional>
+
 #include "usb/classdriver/hid.hpp"
 
 namespace usb {
-  class HIDMouseDriver : public HIDBaseDriver {
+class HIDMouseDriver : public HIDBaseDriver {
    public:
     HIDMouseDriver(Device* dev, int interface_index);
 
@@ -19,7 +20,8 @@ namespace usb {
 
     Error OnDataReceived() override;
 
-    using ObserverType = void (int8_t displacement_x, int8_t displacement_y);
+    using ObserverType = void(uint8_t buttons, int8_t displacement_x,
+                              int8_t displacement_y);
     void SubscribeMouseMove(std::function<ObserverType> observer);
     static std::function<ObserverType> default_observer;
 
@@ -27,6 +29,7 @@ namespace usb {
     std::array<std::function<ObserverType>, 4> observers_;
     int num_observers_ = 0;
 
-    void NotifyMouseMove(int8_t displacement_x, int8_t displacement_y);
-  };
-}
+    void NotifyMouseMove(uint8_t buttons, int8_t displacement_x,
+                         int8_t displacement_y);
+};
+}  // namespace usb
