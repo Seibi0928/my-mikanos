@@ -26,3 +26,5 @@ void SetupIdentityPageTable() {
         }
     }
 }
+
+void InitializePaging() { SetupIdentityPageTable(); }

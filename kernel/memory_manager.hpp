@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "error.hpp"
+#include "memory_map.hpp"
 
 namespace {
 constexpr unsigned long long operator"" _KiB(unsigned long long kib) {
@@ -20,13 +21,13 @@ constexpr unsigned long long operator"" _GiB(unsigned long long gib) {
 }  // namespace
 
 /** @brief 物理メモリフレーム 1 つの大きさ（バイト） */
-static const auto kBytePerFrame{4_KiB};
+static const auto kBytesPerFrame{4_KiB};
 
 class FrameID {
    public:
     explicit FrameID(size_t id) : id_{id} {}
     size_t ID() const { return id_; }
-    void* Frame() const { return reinterpret_cast<void*>(id_ * kBytePerFrame); }
+    void* Frame() const { return reinterpret_cast<void*>(id_ * kBytesPerFrame); }
 
    private:
     size_t id_;
@@ -47,7 +48,7 @@ class BitmapMemoryManager {
     static const auto kMaxPhysicalMemoryBytes{128_GiB};
     /** @brief kMaxPhysicalMemoryBytes
      * までの物理メモリを扱うために必要なフレーム数 */
-    static const auto kFrameCount{kMaxPhysicalMemoryBytes / kBytePerFrame};
+    static const auto kFrameCount{kMaxPhysicalMemoryBytes / kBytesPerFrame};
 
     /** @brief ビットマップ配列の要素型 */
     using MapLineType = unsigned long;
@@ -83,4 +84,4 @@ class BitmapMemoryManager {
     void SetBit(FrameID frame, bool allocated);
 };
 
-Error InitializeHeap(BitmapMemoryManager& memory_manager);
+void InitializeMemoryManager(const MemoryMap& memory_map);
