@@ -2,6 +2,7 @@
 
 #include "asmfunc.h"
 #include "segment.hpp"
+#include "timer.hpp"
 
 std::array<InterruptDescriptor, 256> idt;
 
@@ -28,7 +29,7 @@ __attribute__((interrupt)) void IntHandlerXHCI(InterruptFrame* frame) {
 }
 
 __attribute__((interrupt)) void IntHandlerLAPICTimer(InterruptFrame* frame) {
-    msg_queue->push_back(Message{Message::kInterruptLAPICTimer});
+    LAPICTimerOnInterrupt();
     NotifyEndOfInterrupt();
 }
 }  // namespace
@@ -42,5 +43,5 @@ void InitializeInterrupt(std::deque<Message>* msg_queue) {
     SetIDTEntry(idt[InterruptVector::kLAPICTimer],
                 MakeIDTAttr(DescriptorType::kInterruptGate, 0),
                 reinterpret_cast<uint64_t>(IntHandlerLAPICTimer), kKernelCS);
-        LoadIDT(sizeof(idt) - 1, reinterpret_cast<uintptr_t>(&idt[0]));
+    LoadIDT(sizeof(idt) - 1, reinterpret_cast<uintptr_t>(&idt[0]));
 }
