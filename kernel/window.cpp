@@ -29,7 +29,7 @@ Window::Window(int width, int height, PixelFormat shadow_format)
  * @param dst Window の書き込み先
  * @param pos 書き込み先における Window の左上の座標
  * @param area 書き込み先における更新したい領域
-*/
+ */
 void Window::DrawTo(FrameBuffer& dst, Vector2D<int> pos,
                     const Rectangle<int>& area) {
     if (transparent_color_) {
@@ -48,7 +48,7 @@ void Window::DrawTo(FrameBuffer& dst, Vector2D<int> pos,
     } else {
         Rectangle<int> widnow_area{pos, Size()};
         Rectangle<int> intersection = area & widnow_area;
-        // 第三引数はWindow上の相対領域を指定する
+        // NOTE: 第3引数はWindow上の相対領域を指定する
         dst.Copy(intersection.pos, shadow_buffer_,
                  {intersection.pos - pos, intersection.size});
     }
@@ -89,12 +89,6 @@ const char close_button[kCloseButtonHeight][kCloseButtonWidth + 1] = {
     ".:::@@::::@@::$@", ".:::::::::::::$@", ".:::::::::::::$@",
     ".$$$$$$$$$$$$$$@", "@@@@@@@@@@@@@@@@",
 };
-
-constexpr PixelColor ToColor(uint32_t c) {
-    return {static_cast<uint8_t>((c >> 16) & 0xff),
-            static_cast<uint8_t>((c >> 8) & 0xff),
-            static_cast<uint8_t>(c & 0xff)};
-}
 }  // namespace
 
 void DrawWindow(PixelWriter& writer, const char* title) {
@@ -131,4 +125,17 @@ void DrawWindow(PixelWriter& writer, const char* title) {
             writer.Write({win_w - 5 - kCloseButtonWidth + x, 5 + y}, c);
         }
     }
+}
+
+void DrawTextbox(PixelWriter& writer, Vector2D<int> pos, Vector2D<int> size) {
+    auto fill_rect = [&writer](Vector2D<int> pos, Vector2D<int> size,
+                               uint32_t c) {
+        FillRectangle(writer, pos, size, ToColor(c));
+    };
+
+    fill_rect(pos + Vector2D<int>{1, 1}, size - Vector2D<int>{2, 2}, 0xffffff);
+    fill_rect(pos, {size.x, 1}, 0x848484);
+    fill_rect(pos, {1, size.y}, 0x848484);
+    fill_rect(pos + Vector2D<int>{0, size.y}, {size.x, 1}, 0xc6c6c6);
+    fill_rect(pos + Vector2D<int>{size.x, 0}, {1, size.y}, 0xc6c6c6);
 }
