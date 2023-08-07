@@ -65,7 +65,7 @@ void InitializeGraphics(const FrameBufferConfig& screen_config) {
   ::screen_config = screen_config;
 
   switch (screen_config.pixel_format) {
-    case kPixelRBGResv8BitPerColor:
+    case kPixelRGBResv8BitPerColor:
       ::screen_writer = new(pixel_writer_buf)
         RGBResv8BitPerColorPixelWriter{screen_config};
       break;

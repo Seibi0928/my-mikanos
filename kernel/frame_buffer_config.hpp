@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 enum PixelFormat {
-    kPixelRBGResv8BitPerColor,
+    kPixelRGBResv8BitPerColor,
     kPixelBGRResv8BitPerColor,
 };
 

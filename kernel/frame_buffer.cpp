@@ -7,7 +7,7 @@
 namespace {
 int BytesPerPixel(PixelFormat format) {
     switch (format) {
-        case kPixelRBGResv8BitPerColor:
+        case kPixelRGBResv8BitPerColor:
             return 4;
         case kPixelBGRResv8BitPerColor:
             return 4;
@@ -49,7 +49,7 @@ Error FrameBuffer::Initialize(const FrameBufferConfig& config) {
     }
 
     switch (config_.pixel_format) {
-        case kPixelRBGResv8BitPerColor:
+        case kPixelRGBResv8BitPerColor:
             writer_ = std::make_unique<RGBResv8BitPerColorPixelWriter>(config_);
             return MAKE_ERROR(Error::kSuccess);
         case kPixelBGRResv8BitPerColor:
