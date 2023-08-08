@@ -11,6 +11,7 @@
         "memory_map.hpp": "c",
         "types.h": "c",
         "optional": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "cstring": "cpp"
     }
 }
