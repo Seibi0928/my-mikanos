@@ -4,6 +4,7 @@ hankaku.bin
 .*.d
 *.swp
 kernel/disk.img
+disk.img
 
 /html
 /ipxe_root
