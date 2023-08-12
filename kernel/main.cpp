@@ -1,8 +1,12 @@
-#include <array>
+/**
+ * @file main.cpp
+ *
+ * カーネル本体のプログラムを書いたファイル．
+ */
+
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
-#include <cstring>
 #include <deque>
 #include <limits>
 #include <numeric>
@@ -29,20 +33,16 @@
 #include "task.hpp"
 #include "terminal.hpp"
 #include "timer.hpp"
-#include "usb/classdriver/mouse.hpp"
-#include "usb/device.hpp"
-#include "usb/memory.hpp"
-#include "usb/xhci/trb.hpp"
 #include "usb/xhci/xhci.hpp"
 #include "window.hpp"
 
-void operator delete(void* obj) noexcept {}
-
 int printk(const char* format, ...) {
     va_list ap;
-    va_start(ap, format);
+    int result;
     char s[1024];
-    int result = vsprintf(s, format, ap);
+
+    va_start(ap, format);
+    result = vsprintf(s, format, ap);
     va_end(ap);
 
     console->PutString(s);
@@ -54,7 +54,6 @@ unsigned int main_window_layer_id;
 void InitializeMainWindow() {
     main_window = std::make_shared<ToplevelWindow>(
         160, 52, screen_config.pixel_format, "Hello Window");
-    DrawWindow(*main_window->Writer(), "Hello Window");
 
     main_window_layer_id = layer_manager->NewLayer()
                                .SetWindow(main_window)
@@ -79,7 +78,7 @@ void InitializeTextWindow() {
     text_window_layer_id = layer_manager->NewLayer()
                                .SetWindow(text_window)
                                .SetDraggable(true)
-                               .Move({500, 200})
+                               .Move({500, 100})
                                .ID();
 
     layer_manager->UpDown(text_window_layer_id,
@@ -118,13 +117,6 @@ void InputTextWindow(char c) {
     layer_manager->Draw(text_window_layer_id);
 }
 
-void TaskIdle(uint64_t task_id, uint64_t data) {
-    printk("TaskIdle: task_id=%lu, data=%lu\n", task_id, data);
-    while (true) {
-        __asm__("hlt");
-    }
-}
-
 alignas(16) uint8_t kernel_main_stack[1024 * 1024];
 
 extern "C" void KernelMainNewStack(
@@ -135,6 +127,7 @@ extern "C" void KernelMainNewStack(
 
     InitializeGraphics(frame_buffer_config_ref);
     InitializeConsole();
+
     printk("Welcome to MikanOS!\n");
     SetLogLevel(kWarn);
 
@@ -156,14 +149,11 @@ extern "C" void KernelMainNewStack(
 
     const int kTextboxCursorTimer = 1;
     const int kTimer05Sec = static_cast<int>(kTimerFreq * 0.5);
-    __asm__("cli");
     timer_manager->AddTimer(Timer{kTimer05Sec, kTextboxCursorTimer});
-    __asm__("sti");
     bool textbox_cursor_visible = false;
 
     InitializeTask();
     Task& main_task = task_manager->CurrentTask();
-
     const uint64_t task_terminal_id =
         task_manager->NewTask().InitContext(TaskTerminal, 0).Wakeup().ID();
 

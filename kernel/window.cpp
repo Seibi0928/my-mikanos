@@ -12,8 +12,11 @@ void DrawTextbox(PixelWriter& writer, Vector2D<int> pos, Vector2D<int> size,
         FillRectangle(writer, pos, size, c);
     };
 
+    // NOTE: fill main box
     fill_rect(pos + Vector2D<int>{1, 1}, size - Vector2D<int>{2, 2},
               background);
+
+    // NOTE: draw border lines
     fill_rect(pos, {size.x, 1}, border_dark);
     fill_rect(pos, {1, size.y}, border_dark);
     fill_rect(pos + Vector2D<int>{0, size.y}, {size.x, 1}, border_light);
@@ -50,25 +53,25 @@ Window::Window(int width, int height, PixelFormat shadow_format)
  */
 void Window::DrawTo(FrameBuffer& dst, Vector2D<int> pos,
                     const Rectangle<int>& area) {
-    if (transparent_color_) {
-        const auto tc = transparent_color_.value();
-        auto& writer = dst.Writer();
-        for (int y = std::max(0, 0 - pos.y);
-             y < std::min(Height(), writer.Height() - -pos.y); ++y) {
-            for (int x = std::max(0, 0 - pos.x);
-                 x < std::min(Width(), writer.Width() - pos.x); ++x) {
-                const auto c = At(Vector2D<int>{x, y});
-                if (c != tc) {
-                    writer.Write(pos + Vector2D<int>{x, y}, c);
-                }
-            }
-        }
-    } else {
-        Rectangle<int> widnow_area{pos, Size()};
-        Rectangle<int> intersection = area & widnow_area;
-        // NOTE: 第3引数はWindow上の相対領域を指定する
+    if (!transparent_color_) {
+        Rectangle<int> window_area{pos, Size()};
+        Rectangle<int> intersection = area & window_area;
         dst.Copy(intersection.pos, shadow_buffer_,
                  {intersection.pos - pos, intersection.size});
+        return;
+    }
+
+    const auto tc = transparent_color_.value();
+    auto& writer = dst.Writer();
+    for (int y = std::max(0, 0 - pos.y);
+         y < std::min(Height(), writer.Height() - pos.y); ++y) {
+        for (int x = std::max(0, 0 - pos.x);
+             x < std::min(Width(), writer.Width() - pos.x); ++x) {
+            const auto c = At(Vector2D<int>{x, y});
+            if (c != tc) {
+                writer.Write(pos + Vector2D<int>{x, y}, c);
+            }
+        }
     }
 }
 
@@ -100,7 +103,7 @@ void Window::Move(Vector2D<int> dst_pos, const Rectangle<int>& src) {
 ToplevelWindow::ToplevelWindow(int width, int height, PixelFormat shadow_format,
                                const std::string& title)
     : Window{width, height, shadow_format}, title_{title} {
-    DrawWindow(*Writer(), title.c_str());
+    DrawWindow(*Writer(), title_.c_str());
 }
 
 void ToplevelWindow::Activate() {

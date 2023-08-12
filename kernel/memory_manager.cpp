@@ -21,9 +21,14 @@ WithError<FrameID> BitmapMemoryManager::Allocate(size_t num_frames) {
             }
         }
         if (i == num_frames) {
+            // NOTE: num_frames 分の空きが見つかった
             MarkAllocated(FrameID{start_frame_id}, num_frames);
-            return {FrameID{start_frame_id}, MAKE_ERROR(Error::kSuccess)};
+            return {
+                FrameID{start_frame_id},
+                MAKE_ERROR(Error::kSuccess),
+            };
         }
+        // NOTE:: 次のフレームから再検索
         start_frame_id += i + 1;
     }
 }
@@ -71,7 +76,6 @@ extern "C" caddr_t program_break, program_break_end;
 
 namespace {
 char memory_manager_buf[sizeof(BitmapMemoryManager)];
-BitmapMemoryManager* memory_manager;
 
 Error InitializeHeap(BitmapMemoryManager& memory_manager) {
     const int kHeapFrames = 64 * 512;
@@ -86,6 +90,8 @@ Error InitializeHeap(BitmapMemoryManager& memory_manager) {
     return MAKE_ERROR(Error::kSuccess);
 }
 }  // namespace
+
+BitmapMemoryManager* memory_manager;
 
 void InitializeMemoryManager(const MemoryMap& memory_map) {
     ::memory_manager = new (memory_manager_buf) BitmapMemoryManager;

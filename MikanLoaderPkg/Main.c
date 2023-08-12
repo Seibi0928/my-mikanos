@@ -216,17 +216,17 @@ EFI_STATUS ReadFile(EFI_FILE_PROTOCOL* file, VOID** buffer) {
 EFI_STATUS OpenBlockIoProtocolForLoadedImage(EFI_HANDLE image_handle,
                                              EFI_BLOCK_IO_PROTOCOL** block_io) {
     EFI_STATUS status;
-    EFI_LOADED_IMAGE_PROTOCOL* loaded_iamge;
+    EFI_LOADED_IMAGE_PROTOCOL* loaded_image;
 
     status = gBS->OpenProtocol(image_handle, &gEfiLoadedImageProtocolGuid,
-                               (VOID**)&loaded_iamge, image_handle, NULL,
+                               (VOID**)&loaded_image, image_handle, NULL,
                                EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
     if (EFI_ERROR(status)) {
         return status;
     }
 
     status = gBS->OpenProtocol(
-        loaded_iamge->DeviceHandle, &gEfiBlockIoProtocolGuid, (VOID**)block_io,
+        loaded_image->DeviceHandle, &gEfiBlockIoProtocolGuid, (VOID**)block_io,
         image_handle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
     return status;
@@ -348,7 +348,7 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE image_handle,
     VOID* volume_image;
 
     EFI_FILE_PROTOCOL* volume_file;
-    status = root_dir->Open(root_dir, &volume_file, L"\\fat_dist",
+    status = root_dir->Open(root_dir, &volume_file, L"\\fat_disk",
                             EFI_FILE_MODE_READ, 0);
     if (status == EFI_SUCCESS) {
         status = ReadFile(volume_file, &volume_image);
@@ -371,7 +371,8 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE image_handle,
         }
 
         Print(L"Reading %lu bytes (Present %d, BlockSize %u, LastBlock %u)\n",
-              volume_bytes, media->MediaId, volume_bytes, &volume_image);
+              volume_bytes, media->MediaPresent, media->BlockSize,
+              media->LastBlock);
 
         status =
             ReadBlocks(block_io, media->MediaId, volume_bytes, &volume_image);

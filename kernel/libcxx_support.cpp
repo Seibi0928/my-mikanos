@@ -1,6 +1,5 @@
 #include <new>
 #include <cerrno>
-#include <stdlib.h>
 
 int printk(const char* format, ...);
 

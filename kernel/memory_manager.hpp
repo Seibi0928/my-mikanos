@@ -1,3 +1,9 @@
+/**
+ * @file memory_manager.hpp
+ *
+ * メモリ管理クラスと周辺機能を集めたファイル．
+ */
+
 #pragma once
 
 #include <array>
@@ -7,15 +13,15 @@
 #include "memory_map.hpp"
 
 namespace {
-constexpr unsigned long long operator"" _KiB(unsigned long long kib) {
+constexpr unsigned long long operator""_KiB(unsigned long long kib) {
     return kib * 1024;
 }
 
-constexpr unsigned long long operator"" _MiB(unsigned long long mib) {
+constexpr unsigned long long operator""_MiB(unsigned long long mib) {
     return mib * 1024_KiB;
 }
 
-constexpr unsigned long long operator"" _GiB(unsigned long long gib) {
+constexpr unsigned long long operator""_GiB(unsigned long long gib) {
     return gib * 1024_MiB;
 }
 }  // namespace
@@ -27,7 +33,9 @@ class FrameID {
    public:
     explicit FrameID(size_t id) : id_{id} {}
     size_t ID() const { return id_; }
-    void* Frame() const { return reinterpret_cast<void*>(id_ * kBytesPerFrame); }
+    void* Frame() const {
+        return reinterpret_cast<void*>(id_ * kBytesPerFrame);
+    }
 
    private:
     size_t id_;
@@ -52,6 +60,7 @@ class BitmapMemoryManager {
 
     /** @brief ビットマップ配列の要素型 */
     using MapLineType = unsigned long;
+    /** @brief ビットマップ配列の 1 つの要素のビット数 == フレーム数 */
     static const size_t kBitsPerMapLine{8 * sizeof(MapLineType)};
 
     /** @brief インスタンスを初期化する． */
@@ -84,4 +93,5 @@ class BitmapMemoryManager {
     void SetBit(FrameID frame, bool allocated);
 };
 
+extern BitmapMemoryManager* memory_manager;
 void InitializeMemoryManager(const MemoryMap& memory_map);

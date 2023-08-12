@@ -1,3 +1,9 @@
+/**
+ * @file window.hpp
+ *
+ * 表示領域を表すWindowクラスを提供する。
+ */
+
 #pragma once
 
 #include <optional>
@@ -7,8 +13,14 @@
 #include "frame_buffer.hpp"
 #include "graphics.hpp"
 
+/** @brief Window クラスはグラフィックの表示領域を表す。
+ *
+ * タイトルやメニューがあるウィンドウだけでなく，マウスカーソルの表示領域なども対象とする。
+ */
 class Window {
    public:
+    /** @brief WindowWriter は Window と関連付けられた PixelWriter を提供する。
+     */
     class WindowWriter : public PixelWriter {
        public:
         WindowWriter(Window& window) : window_{window} {}
@@ -34,9 +46,9 @@ class Window {
 
     /** @brief 与えられた FrameBuffer にこのウィンドウの表示領域を描画する。
      *
-     * @param dst 描画先
-     * @param pos writer の左上を基準とした描画位置
-     * @param area dst の左上を基準とした描画対象範囲
+     * @param dst  描画先
+     * @param pos  dst の左上を基準としたウィンドウの位置
+     * @param area  dst の左上を基準とした描画対象範囲
      */
     void DrawTo(FrameBuffer& dst, Vector2D<int> pos,
                 const Rectangle<int>& area);
@@ -47,6 +59,7 @@ class Window {
 
     /** @brief 指定した位置のピクセルを返す。 */
     const PixelColor& At(Vector2D<int> pos) const;
+    /** @brief 指定した位置にピクセルを書き込む。 */
     void Write(Vector2D<int> pos, PixelColor c);
 
     /** @brief 平面描画領域の横幅をピクセル単位で返す。 */
@@ -60,7 +73,7 @@ class Window {
      *
      * @param src_pos   移動元矩形の原点
      * @param src_size  移動元矩形の大きさ
-     * @param dst_pos   移動先の原点 n
+     * @param dst_pos   移動先の原点
      */
     void Move(Vector2D<int> dst_pos, const Rectangle<int>& src);
 

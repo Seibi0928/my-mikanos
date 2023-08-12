@@ -1,8 +1,5 @@
 #include "task.hpp"
 
-#include <algorithm>
-#include <cstring>
-
 #include "asmfunc.h"
 #include "segment.hpp"
 #include "timer.hpp"
@@ -36,6 +33,9 @@ Task& Task::InitContext(TaskFunc* f, int64_t data) {
     context_.rip = reinterpret_cast<uint64_t>(f);
     context_.rdi = id_;
     context_.rsi = data;
+
+    // MXCSR のすべての例外をマスクする
+    *reinterpret_cast<uint32_t*>(&context_.fxsave_area[24]) = 0x1f80;
 
     return *this;
 }
