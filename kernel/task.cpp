@@ -1,5 +1,8 @@
 #include "task.hpp"
 
+#include <algorithm>
+#include <cstring>
+
 #include "asmfunc.h"
 #include "segment.hpp"
 #include "timer.hpp"
@@ -41,6 +44,8 @@ Task& Task::InitContext(TaskFunc* f, int64_t data) {
 }
 
 TaskContext& Task::Context() { return context_; }
+
+uint64_t& Task::OSStackPointer() { return os_stack_ptr_; }
 
 uint64_t Task::ID() const { return id_; }
 

@@ -172,12 +172,19 @@ RestoreContext:  ; void RestoreContext(void* task_context);
 
 global CallApp
 CallApp:
+    push rbx
     push rbp
-    mov rbp, rsp
-    push rcx    ; SS
-    push r9 ; RSP
+    push r12
+    push r13
+    push r14
+    push r15
+    mov[r9], rsp    ; NOTE: OS用のスタックポインタを保存
+
+    push rdx    ; SS
+    push r8 ; RSP
+    add rdx, 8
     push rdx    ; CS
-    push r8 ;RIP
+    push rcx    ; RIP
     o64 retf
 
 extern LAPICTimerOnInterrupt
@@ -265,6 +272,8 @@ SyscallEntry:
     push rcx
     push r11
 
+    push rax  ; NOTE: システムコール番号を保存
+
     mov rcx, r10
     and eax, 0x7fffffff
     mov rbp, rsp
@@ -274,7 +283,24 @@ SyscallEntry:
 
     mov rsp, rbp
 
+    pop rsi  ; NOTE: システムコール番号を復帰
+    cmp esi, 0x80000002
+    je .exit
+
     pop r11
     pop rcx
     pop rbp
     o64 sysret
+
+.exit:
+    mov rsp, rax
+    mov eax, edx
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
+    pop rbx
+
+    ret
