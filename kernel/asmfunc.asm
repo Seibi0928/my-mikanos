@@ -265,6 +265,7 @@ WriteMSR:
     wrmsr
     ret
 
+extern GetCurrentTaskOSStackPointer
 extern syscall_table
 global SyscallEntry
 SyscallEntry:
@@ -277,6 +278,22 @@ SyscallEntry:
     mov rcx, r10
     and eax, 0x7fffffff
     mov rbp, rsp
+
+    ; NOTE: システムコールをOS用スタックで実行するための準備
+    and rsp, 0xfffffffffffffff0
+    push rax
+    push rdx
+    cli
+    call GetCurrentTaskOSStackPointer
+    sti
+    mov rdx, [rsp + 0]  ; RDX
+    mov [rax - 16], rdx
+    mov rdx, [rsp + 8]  ; RAX
+    mov [rax - 8], rdx
+
+    lea rsp, [rax - 16]
+    pop rdx
+    pop rax
     and rsp, 0xfffffffffffffff0
 
     call [syscall_table + 8 * eax]
