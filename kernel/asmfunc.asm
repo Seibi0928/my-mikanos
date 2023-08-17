@@ -312,6 +312,12 @@ SyscallEntry:
 .exit:
     mov rsp, rax
     mov eax, edx
+    jmp ExitApp
+
+global ExitApp
+ExitApp:
+    mov rsp, rdi
+    mov eax, esi
 
     pop r15
     pop r14
@@ -320,4 +326,4 @@ SyscallEntry:
     pop rbp
     pop rbx
 
-    ret
+    ret ; CallApp の次の行に飛ぶ
