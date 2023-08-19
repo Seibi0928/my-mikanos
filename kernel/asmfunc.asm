@@ -171,23 +171,27 @@ RestoreContext:  ; void RestoreContext(void* task_context);
     o64 iret
 
 global CallApp
-CallApp:
+CallApp:  ; int CallApp(int argc, char** argv, uint16_t ss,
+          ;             uint64_t rip, uint64_t rsp, uint64_t* os_stack_ptr);
     push rbx
     push rbp
     push r12
     push r13
     push r14
     push r15
-    mov[r9], rsp    ; NOTE: OS用のスタックポインタを保存
+    mov [r9], rsp    ; NOTE: OS用のスタックポインタを保存
 
-    push rdx    ; SS
-    push r8 ; RSP
+    push rdx  ; SS
+    push r8   ; RSP
     add rdx, 8
-    push rdx    ; CS
-    push rcx    ; RIP
+    push rdx  ; CS
+    push rcx  ; RIP
     o64 retf
+    ; アプリケーションが終了してもここには来ない
 
 extern LAPICTimerOnInterrupt
+; void LAPICTimerOnInterrupt(const TaskContext& ctx_stack);
+
 global IntHandlerLAPICTimer
 IntHandlerLAPICTimer:  ; void IntHandlerLAPICTimer();
     push rbp
@@ -252,12 +256,12 @@ IntHandlerLAPICTimer:  ; void IntHandlerLAPICTimer();
     iretq
 
 global LoadTR
-LoadTR:
+LoadTR:  ; void LoadTR(uint16_t sel);
     ltr di
     ret
 
 global WriteMSR
-WriteMSR:
+WriteMSR:  ; void WriteMSR(uint32_t msr, uint64_t value);
     mov rdx, rsi
     shr rdx, 32
     mov eax, esi
@@ -268,12 +272,12 @@ WriteMSR:
 extern GetCurrentTaskOSStackPointer
 extern syscall_table
 global SyscallEntry
-SyscallEntry:
+SyscallEntry:  ; void SyscallEntry(void);
     push rbp
-    push rcx
-    push r11
+    push rcx  ; original RIP
+    push r11  ; original RFLAGS
 
-    push rax  ; NOTE: システムコール番号を保存
+    push rax  ; システムコール番号を保存
 
     mov rcx, r10
     and eax, 0x7fffffff
@@ -302,7 +306,7 @@ SyscallEntry:
 
     pop rsi  ; NOTE: システムコール番号を復帰
     cmp esi, 0x80000002
-    je .exit
+    je  .exit
 
     pop r11
     pop rcx
@@ -310,11 +314,11 @@ SyscallEntry:
     o64 sysret
 
 .exit:
-    mov rsp, rax
-    mov eax, edx
+    mov rdi, rax
+    mov esi, edx
     jmp ExitApp
 
-global ExitApp
+global ExitApp  ; void ExitApp(uint64_t rsp, int32_t ret_val);
 ExitApp:
     mov rsp, rdi
     mov eax, esi
@@ -326,4 +330,4 @@ ExitApp:
     pop rbp
     pop rbx
 
-    ret ; CallApp の次の行に飛ぶ
+    ret  ; CallApp の次の行に飛ぶ
