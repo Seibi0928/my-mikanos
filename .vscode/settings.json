@@ -52,6 +52,7 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "frame_buffer_config.hpp": "c"
+        "frame_buffer_config.hpp": "c",
+        "bitset": "cpp"
     }
 }
