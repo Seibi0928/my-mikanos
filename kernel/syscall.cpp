@@ -49,13 +49,14 @@ SYSCALL(PutString) {
         return {0, E2BIG};
     }
 
-    // NOTE: fdはファイルディスクリプタ 1はターミナルを表す
-    if (fd == 1) {
-        const auto task_id = task_manager->CurrentTask().ID();
-        (*terminals)[task_id]->Print(s, len);
-        return {len, 0};
+    __asm__("cli");
+    auto& task = task_manager->CurrentTask();
+    __asm__("sti");
+
+    if (fd < 0 || task.Files().size() <= fd || !task.Files()[fd]) {
+        return {0, EBADF};
     }
-    return {0, EBADF};
+    return {task.Files()[fd]->Write(s, len), 0};
 }
 
 SYSCALL(Exit) {
@@ -113,6 +114,7 @@ Result DoWinFunc(Func f, uint64_t layer_id_flags, Args... args) {
     return res;
 }
 }  // namespace
+
 SYSCALL(WinWriteString) {
     return DoWinFunc(
         [](Window& win, int x, int y, uint32_t color, const char* s) {
