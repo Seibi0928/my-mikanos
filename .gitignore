@@ -8,3 +8,5 @@ disk.img
 
 /html
 /ipxe_root
+
+.*.un~
